@@ -1,7 +1,8 @@
+import os
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
-
+from sentence_transformers import SentenceTransformer
 
 class FinancialSituationMemory:
     def __init__(self, name, config):
@@ -15,11 +16,17 @@ class FinancialSituationMemory:
 
     def get_embedding(self, text):
         """Get OpenAI embedding for a text"""
-        
-        response = self.client.embeddings.create(
-            model=self.embedding, input=text
-        )
-        return response.data[0].embedding
+        if os.environ.get("OPENAI_API_KEY"):
+            client = OpenAI()
+            response = client.embeddings.create(
+                model=self.embedding, input=text
+            )
+            return response.data[0].embedding
+        else:
+            model = SentenceTransformer("all-MiniLM-L6-v2")
+            embeddings = model.encode(text, convert_to_numpy=True)
+            return embeddings
+
 
     def add_situations(self, situations_and_advice):
         """Add financial situations and their corresponding advice. Parameter is a list of tuples (situation, rec)"""
