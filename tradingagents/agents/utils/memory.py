@@ -10,22 +10,42 @@ class FinancialSituationMemory:
             self.embedding = "nomic-embed-text"
         else:
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
+        self.backend_url = config.get("backend_url", "https://api.openai.com/v1")
+        self.client = OpenAI(base_url=self.backend_url)
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
-        """Get OpenAI embedding for a text"""
-        if os.environ.get("OPENAI_API_KEY"):
-            client = OpenAI()
-            response = client.embeddings.create(
-                model=self.embedding, input=text
-            )
-            return response.data[0].embedding
-        else:
-            model = SentenceTransformer("all-MiniLM-L6-v2")
-            embeddings = model.encode(text, convert_to_numpy=True)
-            return embeddings
+        """Get embedding for a text. Uses local sentence-transformers for DeepSeek/other providers, OpenAI API for OpenAI only."""
+        # Check if we're using DeepSeek, Ollama, or another non-OpenAI provider
+        backend_url = getattr(self, 'backend_url', None) or "https://api.openai.com/v1"
+        
+        # Use local embeddings if using DeepSeek, Ollama, or any non-OpenAI provider
+        # OpenAI embeddings API only works with actual OpenAI keys and endpoints
+        is_deepseek = "deepseek.com" in backend_url.lower()
+        is_ollama = "localhost:11434" in backend_url.lower() or "ollama" in backend_url.lower()
+        is_non_openai = is_deepseek or is_ollama or not "api.openai.com" in backend_url.lower()
+        
+        if not is_non_openai:
+            # Try OpenAI embeddings API only if using actual OpenAI
+            openai_api_key = os.environ.get("OPENAI_API_KEY")
+            if openai_api_key:
+                try:
+                    # Verify this is actually an OpenAI key by attempting the request
+                    client = OpenAI(api_key=openai_api_key)
+                    response = client.embeddings.create(
+                        model=self.embedding, input=text
+                    )
+                    return response.data[0].embedding
+                except Exception as e:
+                    # If OpenAI embeddings fail (invalid key, rate limit, etc.), fall back to local
+                    print(f"Warning: OpenAI embeddings failed, using local embeddings: {e}")
+        
+        # Use local sentence-transformers for DeepSeek, Ollama, or as fallback
+        # This works offline and doesn't require API keys
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+        embeddings = model.encode(text, convert_to_numpy=True)
+        return embeddings
 
 
     def add_situations(self, situations_and_advice):
