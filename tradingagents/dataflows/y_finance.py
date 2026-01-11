@@ -383,6 +383,33 @@ def get_income_statement(
         return f"Error retrieving income statement for {ticker}: {str(e)}"
 
 
+def get_fundamentals(
+    ticker: Annotated[str, "ticker symbol of the company"],
+    curr_date: Annotated[str, "current date (not used for yfinance)"] = None
+):
+    """Get comprehensive fundamental data from yfinance by aggregating balance sheet, cash flow, and income statement."""
+    try:
+        # Aggregate balance sheet, cash flow, and income statement
+        balance_sheet = get_balance_sheet(ticker, freq="quarterly", curr_date=curr_date)
+        cashflow = get_cashflow(ticker, freq="quarterly", curr_date=curr_date)
+        income_stmt = get_income_statement(ticker, freq="quarterly", curr_date=curr_date)
+        
+        # Combine all fundamental data
+        result = f"# Comprehensive Fundamental Data for {ticker.upper()}\n"
+        result += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        result += "## Balance Sheet\n"
+        result += balance_sheet + "\n\n"
+        result += "## Cash Flow Statement\n"
+        result += cashflow + "\n\n"
+        result += "## Income Statement\n"
+        result += income_stmt
+        
+        return result
+        
+    except Exception as e:
+        return f"Error retrieving fundamentals for {ticker}: {str(e)}"
+
+
 def get_insider_transactions(
     ticker: Annotated[str, "ticker symbol of the company"]
 ):
@@ -405,3 +432,119 @@ def get_insider_transactions(
         
     except Exception as e:
         return f"Error retrieving insider transactions for {ticker}: {str(e)}"
+
+
+def get_yfinance_news(
+    ticker: Annotated[str, "ticker symbol of the company"],
+    start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
+    end_date: Annotated[str, "End date in yyyy-mm-dd format"],
+) -> str:
+    """
+    Get news articles for a ticker from Yahoo Finance.
+    
+    Args:
+        ticker: Stock ticker symbol (e.g., "SPY", "AAPL")
+        start_date: Start date in yyyy-mm-dd format (for filtering)
+        end_date: End date in yyyy-mm-dd format (for filtering)
+    
+    Returns:
+        Formatted string containing news articles
+    """
+    try:
+        # Validate dates
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        # Extend end_date to include end of day for proper date comparison
+        end_dt = end_dt.replace(hour=23, minute=59, second=59)
+        
+        # Create ticker object
+        ticker_obj = yf.Ticker(ticker.upper())
+        
+        # Get news from Yahoo Finance
+        # Note: yfinance news doesn't support date filtering directly, 
+        # so we get all recent news and filter by date
+        news_list = ticker_obj.news
+        
+        if not news_list or len(news_list) == 0:
+            return f"No news articles found for symbol '{ticker.upper()}' between {start_date} and {end_date}"
+        
+        # Filter news by date and format
+        news_str = ""
+        filtered_count = 0
+        articles_without_date = []
+        
+        for article in news_list:
+            # yfinance news has 'providerPublishTime' in Unix timestamp (seconds)
+            # Convert to datetime for filtering
+            if 'providerPublishTime' in article:
+                try:
+                    # providerPublishTime is in milliseconds (not seconds) for some versions
+                    pub_time = article['providerPublishTime']
+                    if pub_time > 10**10:  # Likely milliseconds
+                        publish_time = datetime.fromtimestamp(pub_time / 1000)
+                    else:  # Likely seconds
+                        publish_time = datetime.fromtimestamp(pub_time)
+                    
+                    # Filter by date range (only date part, ignore time for comparison)
+                    publish_date = publish_time.date()
+                    start_date_only = start_dt.date()
+                    end_date_only = end_dt.date()
+                    
+                    if start_date_only <= publish_date <= end_date_only:
+                        title = article.get('title', 'No title')
+                        publisher = article.get('publisher', 'Unknown publisher')
+                        link = article.get('link', '')
+                        summary = article.get('summary', article.get('description', ''))
+                        
+                        # Format date
+                        publish_date_str = publish_time.strftime('%Y-%m-%d %H:%M:%S')
+                        
+                        news_str += f"### {title}\n"
+                        news_str += f"**Publisher:** {publisher} | **Date:** {publish_date_str}\n"
+                        if link:
+                            news_str += f"**Link:** {link}\n"
+                        if summary:
+                            news_str += f"\n{summary}\n"
+                        news_str += "\n"
+                        
+                        filtered_count += 1
+                except (ValueError, TypeError, KeyError) as e:
+                    # Skip articles with invalid timestamps
+                    continue
+            else:
+                # Store articles without publish time for potential inclusion
+                articles_without_date.append(article)
+        
+        # Add header
+        header = f"# Yahoo Finance News for {ticker.upper()}\n"
+        header += f"# Date range: {start_date} to {end_date}\n"
+        header += f"# Articles found in date range: {filtered_count}\n"
+        header += f"# Total articles available: {len(news_list)}\n"
+        header += f"# Retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        
+        if filtered_count == 0:
+            # If no articles in date range, include most recent articles as context
+            if news_list:
+                header += f"**Note:** No articles found in the specified date range. Showing most recent articles for context:\n\n"
+                for article in news_list[:5]:  # Show top 5 most recent
+                    title = article.get('title', 'No title')
+                    publisher = article.get('publisher', 'Unknown publisher')
+                    link = article.get('link', '')
+                    summary = article.get('summary', article.get('description', ''))
+                    
+                    news_str += f"### {title}\n"
+                    news_str += f"**Publisher:** {publisher}\n"
+                    if link:
+                        news_str += f"**Link:** {link}\n"
+                    if summary:
+                        news_str += f"\n{summary}\n"
+                    news_str += "\n"
+                    
+                return header + news_str
+            else:
+                return f"No news articles found for {ticker.upper()} between {start_date} and {end_date}"
+        
+        return header + news_str
+        
+    except Exception as e:
+        return f"Error retrieving news for {ticker}: {str(e)}"
