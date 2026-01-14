@@ -20,9 +20,9 @@ def create_research_manager(llm, memory):
         for i, rec in enumerate(past_memories, 1):
             past_memory_str += rec["recommendation"] + "\n\n"
 
-        prompt = f"""As the portfolio manager and debate facilitator, your role is to critically evaluate this round of debate and make a definitive decision: align with the bear analyst (recommend Sell), the bull analyst (recommend Buy), or choose Hold if the evidence is truly balanced.
+        prompt = f"""As the portfolio manager and debate facilitator, your role is to critically evaluate this round of debate and make a definitive decision: align with the bull analyst (recommend Buy), the bear analyst (recommend Sell), or choose Hold if the evidence is truly balanced.
 
-Summarize the key points from both sides concisely, focusing on the most compelling evidence or reasoning. Your recommendation—Buy, Sell, or Hold—must be clear and actionable. Evaluate Buy, Sell, and Hold options equally based on the strength of evidence. If the bull case is stronger, recommend Buy. If the bear case is stronger, recommend Sell. Only choose Hold when the evidence is genuinely balanced or uncertain. Commit to a stance grounded in the debate's strongest arguments.
+Summarize the key points from both sides concisely, focusing on the most compelling evidence or reasoning. Your recommendation—Buy, Sell, or Hold—must be clear and actionable. Evaluate Buy, Sell, and Hold options EQUALLY based on the strength of evidence. If the bull case is stronger with compelling growth opportunities, positive indicators, and strong fundamentals, recommend Buy. If the bear case is stronger with significant risks outweighing potential gains, recommend Sell. Only choose Hold when the evidence is genuinely balanced or uncertain. Do not default to Sell or Hold—actively consider Buy when there are strong positive signals. Commit to a stance grounded in the debate's strongest arguments.
 
 Additionally, develop a detailed investment plan for the trader. This should include:
 

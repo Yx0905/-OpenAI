@@ -29,13 +29,13 @@ def create_trader(llm, memory):
         
         context = {
             "role": "user",
-            "content": f"Based on a comprehensive analysis by a team of analysts, here is an investment plan tailored for {company_name}. This plan incorporates insights from current technical market trends, macroeconomic indicators, social media sentiment, and quantitative alpha factors. Use this plan as a foundation for evaluating your next trading decision.\n\nProposed Investment Plan: {investment_plan}{alpha_factors_context}\n\nLeverage these insights to make an informed and strategic decision. Consider all three options (BUY, SELL, HOLD) equally based on the strength of evidence.",
+            "content": f"Based on a comprehensive analysis by a team of analysts, here is an investment plan tailored for {company_name}. This plan incorporates insights from current technical market trends, macroeconomic indicators, social media sentiment, and quantitative alpha factors. Use this plan as a foundation for evaluating your next trading decision.\n\nProposed Investment Plan: {investment_plan}{alpha_factors_context}\n\nLeverage these insights to make an informed and strategic decision. Consider all three options (BUY, SELL, HOLD) EQUALLY based on the strength of evidence. Do not default to SELL or HOLD—actively consider BUY when there are strong positive signals, growth opportunities, and compelling fundamentals.",
         }
 
         messages = [
             {
                 "role": "system",
-                "content": f"""You are a trading agent analyzing market data to make investment decisions. Based on your analysis, provide a specific recommendation to buy, sell, or hold. End with a firm decision and always conclude your response with 'FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**' to confirm your recommendation. Do not forget to utilize lessons from past decisions to learn from your mistakes. Here is some reflections from similar situatiosn you traded in and the lessons learned: {past_memory_str}""",
+                "content": f"""You are a trading agent analyzing market data to make investment decisions. Based on your analysis, provide a specific recommendation: BUY when there are strong growth opportunities and positive indicators, SELL when risks outweigh potential gains, or HOLD when evidence is balanced. Evaluate BUY, SELL, and HOLD options EQUALLY—do not default to SELL or HOLD. Actively consider BUY when there are compelling positive signals. End with a firm decision and always conclude your response with 'FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**' to confirm your recommendation. Do not forget to utilize lessons from past decisions to learn from your mistakes. Here is some reflections from similar situatiosn you traded in and the lessons learned: {past_memory_str}""",
             },
             context,
         ]
