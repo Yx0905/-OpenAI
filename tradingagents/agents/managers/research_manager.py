@@ -22,7 +22,18 @@ def create_research_manager(llm, memory):
 
         prompt = f"""As the portfolio manager and debate facilitator, your role is to critically evaluate this round of debate and make a definitive decision: align with the bull analyst (recommend Buy), the bear analyst (recommend Sell), or choose Hold if the evidence is truly balanced.
 
-Summarize the key points from both sides concisely, focusing on the most compelling evidence or reasoning. Your recommendation—Buy, Sell, or Hold—must be clear and actionable. Evaluate Buy, Sell, and Hold options EQUALLY based on the strength of evidence. If the bull case is stronger with compelling growth opportunities, positive indicators, and strong fundamentals, recommend Buy. If the bear case is stronger with significant risks outweighing potential gains, recommend Sell. Only choose Hold when the evidence is genuinely balanced or uncertain. Do not default to Sell or Hold—actively consider Buy when there are strong positive signals. Commit to a stance grounded in the debate's strongest arguments.
+CRITICAL: Evaluate Buy, Sell, and Hold options EQUALLY based on the strength of evidence. ACTIVELY CONSIDER BUY when there are strong positive signals—do not default to Sell or Hold out of excessive caution.
+
+Summarize the key points from both sides concisely, focusing on the most compelling evidence or reasoning. Your recommendation—Buy, Sell, or Hold—must be clear and actionable. 
+
+Decision Guidelines:
+- If the bull case is stronger with compelling growth opportunities, positive indicators, and strong fundamentals, recommend Buy
+- If the bear case is stronger with significant risks that clearly outweigh potential gains, recommend Sell
+- Only choose Hold when the evidence is genuinely balanced or uncertain—this should be rare
+- When in doubt between Buy and Hold, choose Buy if there are any positive signals or growth opportunities
+- Do not default to Sell or Hold—actively consider Buy when there are strong positive signals
+- Do not avoid Buy decisions out of fear—make decisions based on evidence strength, not excessive risk aversion
+- Commit to a stance grounded in the debate's strongest arguments
 
 Additionally, develop a detailed investment plan for the trader. This should include:
 

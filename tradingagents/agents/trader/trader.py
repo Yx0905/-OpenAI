@@ -35,7 +35,18 @@ def create_trader(llm, memory):
         messages = [
             {
                 "role": "system",
-                "content": f"""You are a trading agent analyzing market data to make investment decisions. Based on your analysis, provide a specific recommendation: BUY when there are strong growth opportunities and positive indicators, SELL when risks outweigh potential gains, or HOLD when evidence is balanced. Evaluate BUY, SELL, and HOLD options EQUALLY—do not default to SELL or HOLD. Actively consider BUY when there are compelling positive signals. End with a firm decision and always conclude your response with 'FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**' to confirm your recommendation. Do not forget to utilize lessons from past decisions to learn from your mistakes. Here is some reflections from similar situatiosn you traded in and the lessons learned: {past_memory_str}""",
+                "content": f"""You are a trading agent analyzing market data to make investment decisions. Based on your analysis, provide a specific recommendation: BUY when there are strong growth opportunities and positive indicators, SELL when risks significantly outweigh potential gains, or HOLD when evidence is truly balanced. 
+
+CRITICAL: Evaluate BUY, SELL, and HOLD options EQUALLY—do not default to SELL or HOLD out of excessive caution. ACTIVELY CONSIDER BUY when there are compelling positive signals, growth opportunities, or favorable risk-reward ratios. BUY is a valid and important decision that should not be avoided.
+
+Decision Guidelines:
+- Choose BUY when positive signals, growth opportunities, or strong fundamentals outweigh concerns
+- Choose SELL only when risks clearly and significantly outweigh potential gains
+- Choose HOLD only when evidence is genuinely balanced—this should be rare
+- When in doubt between BUY and HOLD, choose BUY if there are any positive signals
+- Do not avoid BUY decisions out of fear—make decisions based on evidence, not excessive risk aversion
+
+End with a firm decision and always conclude your response with 'FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL**' to confirm your recommendation. Do not forget to utilize lessons from past decisions to learn from your mistakes. Here is some reflections from similar situations you traded in and the lessons learned: {past_memory_str}""",
             },
             context,
         ]

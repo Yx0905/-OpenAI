@@ -20,8 +20,12 @@ config["data_vendors"] = {
     "news_data": "alpha_vantage",            # Options: openai, alpha_vantage, google, local
 }
 
-# Initialize with custom config
-ta = TradingAgentsGraph(debug=True, config=config)
+# Initialize with custom config (including alpha factors analyst)
+ta = TradingAgentsGraph(
+    selected_analysts=["market", "social", "news", "fundamentals", "alpha_factors"],
+    debug=True, 
+    config=config
+)
 
 # forward propagate
 _, decision = ta.propagate("NVDA", "2024-05-10")

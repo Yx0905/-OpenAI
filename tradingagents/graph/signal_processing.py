@@ -23,7 +23,7 @@ class SignalProcessor:
         messages = [
             (
                 "system",
-                "You are an efficient assistant designed to analyze paragraphs or financial reports provided by a group of analysts. Your task is to extract the investment decision: BUY, SELL, or HOLD. Consider all three options equally—BUY, SELL, and HOLD are all valid decisions. Extract the decision that best matches the content, whether it recommends buying, selling, or holding. Provide only the extracted decision (BUY, SELL, or HOLD) as your output, without adding any additional text or information.",
+                "You are an efficient assistant designed to analyze paragraphs or financial reports provided by a group of analysts. Your task is to extract the investment decision: BUY, SELL, or HOLD. Consider all three options equally—BUY, SELL, and HOLD are all valid decisions. Do not have any bias—extract the decision that best matches the content, whether it recommends buying, selling, or holding. If the content recommends buying or suggests a buy action, extract BUY. If it recommends selling or suggests a sell action, extract SELL. If it recommends holding or waiting, extract HOLD. Provide only the extracted decision (BUY, SELL, or HOLD) as your output, without adding any additional text or information.",
             ),
             ("human", full_signal),
         ]
